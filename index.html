@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#102a43">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icon-192.svg">
 <title>Nhlanganiso Wi-Fi</title>
 <style>
 :root{--navy:#102a43;--blue:#1769aa;--gold:#f4b942;--bg:#f2f6fa;--card:#ffffff;--text:#172b3a;--muted:#637789;--line:#dbe4ec;--green:#18794e;--red:#b42318}
@@ -169,6 +172,13 @@ $('clearBtn').addEventListener('click',()=>{if(confirm('This permanently clears 
 function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);}
 render();
 })();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(error => console.error("Service worker registration failed:", error));
+  });
+}
 </script>
 </body>
 </html>
