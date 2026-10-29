@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#102a43">
+<title>Nhlanganiso Wi-Fi</title>
+<style>
+:root{--navy:#102a43;--blue:#1769aa;--gold:#f4b942;--bg:#f2f6fa;--card:#ffffff;--text:#172b3a;--muted:#637789;--line:#dbe4ec;--green:#18794e;--red:#b42318}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:var(--navy);color:white;padding:20px 16px 18px;border-bottom:4px solid var(--gold)}
+.wrap{max-width:980px;margin:auto}
+.brand{font-size:22px;font-weight:800;letter-spacing:.2px}.tag{color:#d8e5ef;font-size:13px;margin-top:3px}
+main{max-width:980px;margin:auto;padding:16px}
+.notice{background:#fff8e5;border:1px solid #f2d58a;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.45;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.stat,.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 2px 7px #102a4308}
+.stat span{display:block;color:var(--muted);font-size:12px}.stat strong{display:block;font-size:23px;margin-top:5px}
+.tabs{display:flex;gap:8px;overflow:auto;margin:12px 0}
+.tabs button{white-space:nowrap;border:1px solid var(--line);background:white;border-radius:10px;padding:10px 13px;color:var(--text);font-weight:650}
+.tabs button.active{background:var(--blue);border-color:var(--blue);color:white}
+.panel h2{font-size:18px;margin:0 0 12px}
+label{display:block;font-size:13px;font-weight:650;margin:0 0 5px}
+input,select,textarea{width:100%;border:1px solid #bdcbd8;border-radius:9px;padding:11px 10px;font:inherit;background:white;color:#172b3a;min-width:0}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.field.full{grid-column:1/-1}
+button.primary{background:var(--blue);color:white;border:0;border-radius:10px;padding:12px 15px;font:inherit;font-weight:700;cursor:pointer}
+button.secondary{background:white;color:var(--blue);border:1px solid #b8cfe3;border-radius:9px;padding:8px 10px;font:inherit;font-weight:650;cursor:pointer}
+button.danger{background:white;color:var(--red);border:1px solid #f0c5c2;border-radius:9px;padding:8px 10px;font:inherit;cursor:pointer}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.list{display:grid;gap:10px;margin-top:12px}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px}
+.itemtop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.item h3{margin:0;font-size:15px;overflow-wrap:anywhere}.sub{color:var(--muted);font-size:12px;margin-top:4px;line-height:1.5}
+.pill{display:inline-block;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:750;background:#e8f5ee;color:var(--green)}
+.pill.pending{background:#fff2d6;color:#815b00}.pill.expired{background:#feeceb;color:var(--red)}
+.itemactions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.empty{color:var(--muted);font-size:13px;padding:16px 0}
+.hidden{display:none!important}
+.packagegrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:14px}
+.package{border:1px solid var(--line);background:#f8fbff;border-radius:12px;padding:12px}
+.package strong{display:block;font-size:20px;color:var(--blue)}.package span{font-size:12px;color:var(--muted)}
+small.footer{display:block;color:var(--muted);font-size:11px;text-align:center;margin:20px 0 8px;line-height:1.5}
+@media(min-width:700px){.stats{grid-template-columns:repeat(4,minmax(0,1fr))}main{padding:22px}.stat,.panel{padding:18px}}
+@media(max-width:420px){.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.packagegrid{grid-template-columns:1fr 1fr 1fr}.package{padding:9px 7px}.package strong{font-size:18px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="brand">📶 Nhlanganiso Wi-Fi</div><div class="tag">Affordable access. Simple management.</div></div></header>
+<main>
+<div class="notice"><strong>Starter dashboard — local demo</strong><br>Records are saved on this device/browser only. This is not connected to your router or a shared online database yet. Export a backup regularly. Voucher codes created here do not themselves activate or block Wi-Fi access.</div>
+<div class="packagegrid">
+<div class="package"><span>1 DAY · 24 HOURS</span><strong>R5</strong></div>
+<div class="package"><span>7 DAYS</span><strong>R35</strong></div>
+<div class="package"><span>30 DAYS</span><strong>R150</strong></div>
+</div>
+<div class="stats">
+<div class="stat"><span>Total customers</span><strong id="totalCustomers">0</strong></div>
+<div class="stat"><span>Paid vouchers</span><strong id="paidVouchers">0</strong></div>
+<div class="stat"><span>Money received</span><strong id="moneyReceived">R0</strong></div>
+<div class="stat"><span>Unpaid balance</span><strong id="moneyOwed">R0</strong></div>
+</div>
+<div class="tabs" role="tablist">
+<button class="active" data-tab="customers">Customers</button>
+<button data-tab="vouchers">Vouchers & payments</button>
+<button data-tab="reports">Reports & backup</button>
+</div>
+<section class="panel" id="customers">
+<h2>Add customer</h2>
+<form id="customerForm">
+<div class="formgrid">
+<div class="field"><label for="customerName">Customer full name *</label><input id="customerName" required maxlength="100" placeholder="e.g. Thabo Mokoena"></div>
+<div class="field"><label for="customerPhone">Phone number *</label><input id="customerPhone" required maxlength="30" inputmode="tel" placeholder="e.g. 071 234 5678"></div>
+<div class="field full"><label for="customerNotes">Notes (optional)</label><input id="customerNotes" maxlength="250" placeholder="House number or other useful note"></div>
+</div>
+<div class="actions"><button class="primary" type="submit">Save customer</button></div>
+</form>
+<h2 style="margin-top:22px">Customer list</h2>
+<input id="customerSearch" placeholder="Search name or phone" aria-label="Search customers">
+<div id="customerList" class="list"></div>
+</section>
+<section class="panel hidden" id="vouchers">
+<h2>Create voucher / record sale</h2>
+<form id="voucherForm">
+<div class="formgrid">
+<div class="field full"><label for="voucherCustomer">Customer *</label><select id="voucherCustomer" required><option value="">Choose a customer</option></select></div>
+<div class="field"><label for="voucherPackage">Package *</label><select id="voucherPackage" required><option value="1">1 Day — R5</option><option value="7">7 Days — R35</option><option value="30">30 Days — R150</option></select></div>
+<div class="field"><label for="paymentStatus">Payment status *</label><select id="paymentStatus"><option value="unpaid">Unpaid</option><option value="paid">Paid</option></select></div>
+<div class="field"><label for="paymentMethod">Payment method</label><select id="paymentMethod"><option>Cash</option><option>EFT</option><option>Other</option></select></div>
+<div class="field"><label for="saleDate">Sale/start date *</label><input id="saleDate" type="date" required></div>
+</div>
+<div class="actions"><button class="primary" type="submit">Create voucher record</button></div>
+</form>
+<p class="sub">A unique code is generated for your records. It is not yet a working Wi-Fi login code.</p>
+<h2 style="margin-top:22px">Voucher records</h2>
+<div id="voucherList" class="list"></div>
+</section>
+<section class="panel hidden" id="reports">
+<h2>Business summary</h2>
+<div id="reportSummary" class="sub"></div>
+<div class="actions">
+<button class="primary" id="exportBtn" type="button">Export backup (JSON)</button>
+<button class="secondary" id="csvBtn" type="button">Export vouchers (CSV)</button>
+<button class="danger" id="clearBtn" type="button">Clear all local data</button>
+</div>
+<p class="sub" style="margin-top:12px">Keep exported backups somewhere safe. Anyone with access to this browser profile may be able to see these records.</p>
+</section>
+<small class="footer">Nhlanganiso Wi-Fi · Starter dashboard · Local device storage only</small>
+</main>
+<script>
+(function(){
+const PRICES={1:5,7:35,30:150};
+const KEY='nhlanganisoWifiDashboardV1';
+let db={customers:[],vouchers:[]};
+try{const saved=localStorage.getItem(KEY);if(saved){const parsed=JSON.parse(saved);if(parsed&&Array.isArray(parsed.customers)&&Array.isArray(parsed.vouchers))db=parsed;}}catch(e){}
+const $=id=>document.getElementById(id);
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+$('saleDate').value=today();
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function money(n){return 'R'+Number(n||0).toLocaleString('en-ZA',{maximumFractionDigits:2});}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){alert('Could not save on this device. Export a backup and check browser storage.');}render();}
+function makeId(prefix){return prefix+'-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();}
+function expiry(start,days){const d=new Date(start+'T12:00:00');d.setDate(d.getDate()+Number(days));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function isExpired(v){return v.expiresOn < today();}
+function render(){
+$('totalCustomers').textContent=db.customers.length;
+$('paidVouchers').textContent=db.vouchers.filter(v=>v.payment==='paid').length;
+$('moneyReceived').textContent=money(db.vouchers.filter(v=>v.payment==='paid').reduce((s,v)=>s+v.price,0));
+$('moneyOwed').textContent=money(db.vouchers.filter(v=>v.payment!=='paid').reduce((s,v)=>s+v.price,0));
+const search=$('customerSearch').value.trim().toLowerCase();
+const cs=db.customers.filter(c=>(c.name+' '+c.phone).toLowerCase().includes(search));
+$('customerList').innerHTML=cs.length?cs.map(c=>{
+const count=db.vouchers.filter(v=>v.customerId===c.id).length;
+return `<article class="item"><div class="itemtop"><div><h3>${esc(c.name)}</h3><div class="sub">${esc(c.phone)}${c.notes?' · '+esc(c.notes):''}</div><div class="sub">${count} voucher record(s)</div></div><span class="pill">Customer</span></div><div class="itemactions"><button class="secondary" data-action="newvoucher" data-id="${esc(c.id)}">Sell package</button><button class="danger" data-action="deletecustomer" data-id="${esc(c.id)}">Delete</button></div></article>`;
+}).join(''):'<div class="empty">No customers yet. Add your first customer above.</div>';
+$('voucherCustomer').innerHTML='<option value="">Choose a customer</option>'+db.customers.map(c=>`<option value="${esc(c.id)}">${esc(c.name)} — ${esc(c.phone)}</option>`).join('');
+$('voucherList').innerHTML=db.vouchers.length?db.vouchers.slice().reverse().map(v=>{
+const c=db.customers.find(x=>x.id===v.customerId);
+const status=v.payment==='paid'?'Paid':'Payment pending';
+const expiryStatus=isExpired(v)?'Expired':(v.payment==='paid'?'Recorded':'Unpaid');
+return `<article class="item"><div class="itemtop"><div><h3>${esc(v.code)} · ${money(v.price)}</h3><div class="sub">${esc(c?c.name:'Deleted customer')} · ${v.days} day(s)<br>Start: ${esc(v.startDate)} · Expiry: ${esc(v.expiresOn)}<br>${esc(v.method||'Cash')} · ${esc(status)}</div></div><span class="pill ${v.payment!=='paid'?'pending':(isExpired(v)?'expired':'')}">${esc(isExpired(v)?'Expired':status)}</span></div><div class="itemactions">${v.payment!=='paid'?`<button class="secondary" data-action="markpaid" data-id="${esc(v.id)}">Mark paid</button>`:''}<button class="secondary" data-action="copycode" data-id="${esc(v.id)}">Copy code</button><button class="danger" data-action="deletevoucher" data-id="${esc(v.id)}">Delete</button></div></article>`;
+}).join(''):'<div class="empty">No voucher records yet. Add a customer, then record a package sale.</div>';
+const received=db.vouchers.filter(v=>v.payment==='paid').reduce((s,v)=>s+v.price,0);
+const owed=db.vouchers.filter(v=>v.payment!=='paid').reduce((s,v)=>s+v.price,0);
+$('reportSummary').innerHTML=`Customers: <strong>${db.customers.length}</strong><br>Voucher records: <strong>${db.vouchers.length}</strong><br>Payments recorded: <strong>${money(received)}</strong><br>Outstanding balance: <strong>${money(owed)}</strong><br>Paid records: <strong>${db.vouchers.filter(v=>v.payment==='paid').length}</strong><br>Unpaid records: <strong>${db.vouchers.filter(v=>v.payment!=='paid').length}</strong>`;
+}
+document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>{
+document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b===btn));
+['customers','vouchers','reports'].forEach(id=>$(id).classList.toggle('hidden',id!==btn.dataset.tab));
+}));
+$('customerForm').addEventListener('submit',e=>{e.preventDefault();const name=$('customerName').value.trim(),phone=$('customerPhone').value.trim();if(!name||!phone)return;
+db.customers.push({id:makeId('CUS'),name,phone,notes:$('customerNotes').value.trim(),createdAt:new Date().toISOString()});e.target.reset();save();alert('Customer saved on this device.');});
+$('voucherForm').addEventListener('submit',e=>{e.preventDefault();const customerId=$('voucherCustomer').value,days=Number($('voucherPackage').value),startDate=$('saleDate').value;if(!customerId){alert('Choose a customer first.');return;}if(!startDate){alert('Choose a start date.');return;}
+const code='NW-'+Math.random().toString(36).slice(2,6).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+db.vouchers.push({id:makeId('VCH'),code,customerId,days,price:PRICES[days],payment:$('paymentStatus').value,method:$('paymentMethod').value,startDate,expiresOn:expiry(startDate,days),createdAt:new Date().toISOString()});
+save();alert('Voucher record created: '+code+'. This code is for record-keeping only until compatible hotspot authentication is configured.');});
+$('customerSearch').addEventListener('input',render);
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-action]');if(!b)return;const id=b.dataset.id,act=b.dataset.action;
+if(act==='newvoucher'){document.querySelector('[data-tab="vouchers"]').click();$('voucherCustomer').value=id;$('voucherPackage').focus();}
+if(act==='deletecustomer'){const c=db.customers.find(x=>x.id===id);if(c&&confirm('Delete '+c.name+'? Voucher records will remain and show deleted customer.')){db.customers=db.customers.filter(x=>x.id!==id);save();}}
+if(act==='markpaid'){const v=db.vouchers.find(x=>x.id===id);if(v&&confirm('Confirm you have received '+money(v.price)+' for this package?')){v.payment='paid';v.paidAt=new Date().toISOString();save();}}
+if(act==='copycode'){const v=db.vouchers.find(x=>x.id===id);if(v){try{await navigator.clipboard.writeText(v.code);alert('Copied '+v.code);}catch(err){prompt('Copy voucher code:',v.code);}}}
+if(act==='deletevoucher'&&confirm('Delete this voucher record?')){db.vouchers=db.vouchers.filter(x=>x.id!==id);save();}
+});
+$('exportBtn').addEventListener('click',()=>download('nhlanganiso-wifi-backup-'+today()+'.json',JSON.stringify({exportedAt:new Date().toISOString(),...db},null,2),'application/json'));
+$('csvBtn').addEventListener('click',()=>{const rows=[['Voucher code','Customer','Phone','Package days','Price ZAR','Payment','Method','Start date','Expiry date'],...db.vouchers.map(v=>{const c=db.customers.find(x=>x.id===v.customerId);return [v.code,c?.name||'Deleted customer',c?.phone||'',v.days,v.price,v.payment,v.method,v.startDate,v.expiresOn];})];const csv=rows.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');download('nhlanganiso-wifi-vouchers-'+today()+'.csv',csv,'text/csv;charset=utf-8');});
+$('clearBtn').addEventListener('click',()=>{if(confirm('This permanently clears all Nhlanganiso Wi-Fi records stored in this browser. Export a backup first. Continue?')){db={customers:[],vouchers:[]};save();}});
+function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);}
+render();
+})();
+</script>
+</body>
+</html>
