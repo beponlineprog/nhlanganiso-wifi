@@ -51,7 +51,17 @@ small.footer{display:block;color:var(--muted);font-size:11px;text-align:center;m
 </head>
 <body>
 <header><div class="wrap"><div class="brand">📶 Nhlanganiso Wi-Fi</div><div class="tag">Affordable access. Simple management.</div></div></header>
-<main>
+<section id="loginPanel" class="panel" style="max-width:440px;margin:18px auto;padding:18px">
+<h2>Administrator sign in</h2>
+<p class="sub">Sign in with your authorised Firebase administrator account to access shared Nhlanganiso Wi-Fi records.</p>
+<form id="loginForm">
+<div class="field"><label for="adminEmail">Email address</label><input id="adminEmail" type="email" autocomplete="username" required value="bep.onlineprog@gmail.com"></div>
+<div class="field" style="margin-top:12px"><label for="adminPassword">Password</label><input id="adminPassword" type="password" autocomplete="current-password" required></div>
+<div class="actions"><button class="primary" id="loginButton" type="submit">Sign in</button></div>
+<p id="loginMessage" class="sub" role="status" aria-live="polite"></p>
+</form>
+</section>
+<main id="dashboard" class="hidden">
 <div class="notice"><strong>Starter dashboard — local demo</strong><br>Records are saved on this device/browser only. This is not connected to your router or a shared online database yet. Export a backup regularly. Voucher codes created here do not themselves activate or block Wi-Fi access.</div>
 <div class="packagegrid">
 <div class="package"><span>1 DAY · 24 HOURS</span><strong>R5</strong></div>
@@ -109,7 +119,8 @@ small.footer{display:block;color:var(--muted);font-size:11px;text-align:center;m
 </div>
 <p class="sub" style="margin-top:12px">Keep exported backups somewhere safe. Anyone with access to this browser profile may be able to see these records.</p>
 </section>
-<small class="footer">Nhlanganiso Wi-Fi · Starter dashboard · Local device storage only</small>
+<div class="actions" style="justify-content:center"><span id="cloudStatus" class="sub">Connecting…</span><button class="secondary" id="logoutButton" type="button">Sign out</button></div>
+<small class="footer">Nhlanganiso Wi-Fi · Shared Firebase records · Local backup retained</small>
 </main>
 <script>
 (function(){
@@ -122,7 +133,7 @@ const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMon
 $('saleDate').value=today();
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function money(n){return 'R'+Number(n||0).toLocaleString('en-ZA',{maximumFractionDigits:2});}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){alert('Could not save on this device. Export a backup and check browser storage.');}render();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){alert('Could not save on this device. Export a backup and check browser storage.');}render();window.dispatchEvent(new Event('wifi-db-changed'));}
 function makeId(prefix){return prefix+'-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();}
 function expiry(start,days){const d=new Date(start+'T12:00:00');d.setDate(d.getDate()+Number(days));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function isExpired(v){return v.expiresOn < today();}
@@ -170,6 +181,8 @@ $('exportBtn').addEventListener('click',()=>download('nhlanganiso-wifi-backup-'+
 $('csvBtn').addEventListener('click',()=>{const rows=[['Voucher code','Customer','Phone','Package days','Price ZAR','Payment','Method','Start date','Expiry date'],...db.vouchers.map(v=>{const c=db.customers.find(x=>x.id===v.customerId);return [v.code,c?.name||'Deleted customer',c?.phone||'',v.days,v.price,v.payment,v.method,v.startDate,v.expiresOn];})];const csv=rows.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');download('nhlanganiso-wifi-vouchers-'+today()+'.csv',csv,'text/csv;charset=utf-8');});
 $('clearBtn').addEventListener('click',()=>{if(confirm('This permanently clears all Nhlanganiso Wi-Fi records stored in this browser. Export a backup first. Continue?')){db={customers:[],vouchers:[]};save();}});
 function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);}
+window.getWifiDb=()=>JSON.parse(JSON.stringify(db));
+window.setWifiDb=(next)=>{db=next;try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}render();};
 render();
 })();
 </script>
@@ -180,5 +193,128 @@ if ("serviceWorker" in navigator) {
   });
 }
 </script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBcUuzyOSX73fbYqQB8Y0XyJNttUKEFGX0",
+  authDomain: "data-mtn.firebaseapp.com",
+  projectId: "data-mtn",
+  storageBucket: "data-mtn.firebasestorage.app",
+  messagingSenderId: "404391475217",
+  appId: "1:404391475217:web:f8b755d5f603fb714c59b0"
+};
+const ADMIN_UID = "jL524E6wuCTDkKYZ9lue7u3fJtH2";
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const cloudDb = getFirestore(app);
+const $ = id => document.getElementById(id);
+let syncing = false;
+let syncQueue = Promise.resolve();
+
+function message(text, isError=false) {
+  $("loginMessage").textContent = text;
+  $("loginMessage").style.color = isError ? "#b42318" : "#637789";
+}
+function status(text) { $("cloudStatus").textContent = text; }
+
+async function readCollection(name) {
+  const snap = await getDocs(collection(cloudDb, name));
+  return snap.docs.map(item => ({...item.data(), id:item.id}));
+}
+async function initialSync() {
+  status("Loading shared records…");
+  const local = window.getWifiDb();
+  const [remoteCustomers, remoteVouchers] = await Promise.all([
+    readCollection("wifiCustomers"), readCollection("wifiVouchers")
+  ]);
+  // Keep cloud versions where IDs overlap; add any device-only records.
+  const customers = new Map(remoteCustomers.map(x => [x.id,x]));
+  const vouchers = new Map(remoteVouchers.map(x => [x.id,x]));
+  for (const item of local.customers) if (!customers.has(item.id)) customers.set(item.id,item);
+  for (const item of local.vouchers) if (!vouchers.has(item.id)) vouchers.set(item.id,item);
+  const merged = {customers:[...customers.values()],vouchers:[...vouchers.values()]};
+  window.setWifiDb(merged);
+  await syncAll(merged);
+  status("Connected · Shared records are up to date");
+}
+async function syncCollection(name, items) {
+  const snap = await getDocs(collection(cloudDb, name));
+  const keep = new Set(items.map(x => x.id));
+  const jobs = [];
+  for (const item of snap.docs) if (!keep.has(item.id)) jobs.push(deleteDoc(doc(cloudDb,name,item.id)));
+  for (const item of items) jobs.push(setDoc(doc(cloudDb,name,item.id),item));
+  await Promise.all(jobs);
+}
+async function syncAll(data) {
+  if (syncing) return;
+  syncing = true;
+  try {
+    await Promise.all([
+      syncCollection("wifiCustomers",data.customers),
+      syncCollection("wifiVouchers",data.vouchers)
+    ]);
+    status("Connected · All changes saved online");
+  } finally { syncing = false; }
+}
+window.addEventListener("wifi-db-changed", () => {
+  if (!auth.currentUser || auth.currentUser.uid !== ADMIN_UID) return;
+  const data = window.getWifiDb();
+  syncQueue = syncQueue.then(() => syncAll(data)).catch(error => {
+    status("Online save failed — check connection");
+    console.error("Wi-Fi cloud sync failed:",error);
+  });
+});
+
+$("loginForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const email = $("adminEmail").value.trim();
+  const password = $("adminPassword").value;
+  $("loginButton").disabled = true;
+  message("Signing in…");
+  try {
+    const credential = await signInWithEmailAndPassword(auth,email,password);
+    if (credential.user.uid !== ADMIN_UID) {
+      await signOut(auth);
+      throw new Error("This account is not authorised as the Nhlanganiso Wi-Fi administrator.");
+    }
+    message("");
+  } catch (error) {
+    message(error.code === "auth/unauthorized-domain"
+      ? "This website domain is not authorised in Firebase Authentication yet. Contact me for the next setup step."
+      : (error.code === "auth/invalid-credential" || error.code === "auth/wrong-password" || error.code === "auth/user-not-found")
+        ? "Email or password is incorrect."
+        : error.message || "Sign-in failed. Please try again.", true);
+  } finally { $("loginButton").disabled = false; }
+});
+$("logoutButton").addEventListener("click", () => signOut(auth));
+
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    $("loginPanel").classList.remove("hidden");
+    $("dashboard").classList.add("hidden");
+    status("Not signed in");
+    return;
+  }
+  if (user.uid !== ADMIN_UID) {
+    await signOut(auth);
+    message("This account is not authorised.",true);
+    return;
+  }
+  $("loginPanel").classList.add("hidden");
+  $("dashboard").classList.remove("hidden");
+  try {
+    await initialSync();
+  } catch (error) {
+    status("Could not load shared records");
+    alert("Firebase connection failed: " + (error.message || error) + ". Your local backup remains on this device.");
+    console.error(error);
+  }
+});
+</script>
+
 </body>
 </html>
